@@ -1,0 +1,20 @@
+{
+  "name": "jdbc-connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "tasks.max": "1",
+    "connection.url": "jdbc:mysql://mariadb:3306/exampledb",
+    "connection.user": "user",
+    "connection.password": "password",
+    "database.server.name": "mariadb",
+    "database.history.kafka.bootstrap.servers": "kafka:9092",
+    "database.history.kafka.topic": "dbhistory.exampledb",
+    "include.schema.changes": "true",
+    "snapshot.mode": "initial",
+    "snapshot.locking.mode": "none",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false"
+  }
+}

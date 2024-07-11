@@ -1,0 +1,55 @@
+version: '3'
+services:
+  mariadb:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: my_database
+      MYSQL_USER: db_user
+      MYSQL_PASSWORD: db_password
+    ports:
+      - "3306:3306"
+
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:latest
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: "kafka:9092"
+      CONNECT_GROUP_ID: kafka-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: _connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: _connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: _connect-status
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_LOG4J_ROOT_LOGLEVEL: WARN
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components,/mnt/newkafka"
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./:/mnt/newkafka
+    command: 
+      - bash
+      - -c
+      - |
+        echo "Installing JDBC Connector"
+        ls /mnt/newkafka # List files in mounted directory for verification
+        cp /mnt/newkafka/confluentinc-kafka-connect-jdbc-10.7.6.zip /usr/share/confluent-hub-components/
+        apt-get update && apt-get install -y unzip # Install unzip if not already available
+        unzip /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc-10.7.6.zip -d /usr/share/confluent-hub-components/
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: root
+      PMA_PASSWORD: root_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - mariadb

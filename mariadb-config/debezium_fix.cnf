@@ -1,0 +1,3 @@
+[mariadb]
+# Map transaction_isolation to tx_isolation
+transaction_isolation = tx_isolation
